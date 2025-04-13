@@ -1,0 +1,35 @@
+# Writing the provided content into a markdown file
+
+md_content = """
+# Salesforce REST API Integration with Zeotap - Explanation
+
+This document will provide the technical details of integrating **Zeotap** with **Salesforce Service Cloud** using **Salesforce REST API**. The task involves syncing customer contact data between the two platforms to ensure up-to-date contact records in Salesforce.
+
+## 1. Use Case and Goals
+
+The goal of this integration is to ensure that any update in the **customer profile data** on **Zeotap** is synchronized with **Salesforce**. This means if a user updates their contact details on Zeotap (such as email, phone number, or name), these changes should be automatically reflected in the Salesforce **Contact** object, ensuring Salesforce has the most current and accurate data.
+
+### Why is this important?
+By keeping both systems in sync, the business can:
+- Have accurate customer profiles within Salesforce, which is vital for sales, marketing, and customer service teams.
+- Use Salesforce's Service Cloud features efficiently with up-to-date information, avoiding errors or inconsistencies when interacting with customers.
+
+## 2. Data Flow Overview
+
+The integration data flow between Zeotap and Salesforce works as follows:
+
+1. **Data update in Zeotap**: When a customer updates their contact details in Zeotap (for example, changing their phone number or email), Zeotap triggers an API call to Salesforce to update that specific customer’s Contact record.
+   
+2. **API Call to Salesforce**: Zeotap will call Salesforce's REST API endpoints to either **create a new contact** if the contact doesn’t exist or **update an existing contact** if there’s a match (usually based on email or a unique identifier).
+
+3. **Data in Salesforce**: Once the data is passed, Salesforce will update its **Contact object** and store the new values for the customer’s profile.
+
+## 3. Authentication Method
+
+To interact with Salesforce's REST API, we need to authenticate via **OAuth 2.0**. This method ensures secure and authorized access to the Salesforce instance.
+
+### Steps to obtain and use an access token:
+- **Step 1**: First, we need to redirect the user to Salesforce’s authorization URL to get the authorization code.
+  - **Authorization URL**:  
+  ```plaintext
+  https://login.salesforce.com/services/oauth2/authorize
