@@ -1,40 +1,200 @@
-# Writing the provided content into a markdown file
 
-md_content = """
-# Salesforce REST API Integration with Zeotap - Explanation
-
-This document will provide the technical details of integrating **Zeotap** with **Salesforce Service Cloud** using **Salesforce REST API**. The task involves syncing customer contact data between the two platforms to ensure up-to-date contact records in Salesforce.
+# Zeotap and Salesforce Service Cloud Integration
 
 ## 1. Use Case and Goals
+The goal of this integration is to keep customer contact data synchronized between Zeotap (a third-party customer data platform) and Salesforce Service Cloud. By integrating these two platforms, businesses can ensure that any update in Zeotap, such as changes in a customer's profile or contact details, is automatically reflected in Salesforce, leading to:
 
-The goal of this integration is to ensure that any update in the **customer profile data** on **Zeotap** is synchronized with **Salesforce**. This means if a user updates their contact details on Zeotap (such as email, phone number, or name), these changes should be automatically reflected in the Salesforce **Contact** object, ensuring Salesforce has the most current and accurate data.
-
-### Why is this important?
-By keeping both systems in sync, the business can:
-- Have accurate customer profiles within Salesforce, which is vital for sales, marketing, and customer service teams.
-- Use Salesforce's Service Cloud features efficiently with up-to-date information, avoiding errors or inconsistencies when interacting with customers.
+- Accurate, up-to-date customer profiles in Salesforce.
+- Efficient customer support and sales processes by using Salesforce’s Service Cloud capabilities.
+- Ensuring marketing campaigns, customer support teams, and sales teams all work from a single, consistent set of data.
 
 ## 2. Data Flow Overview
+The flow of data between Zeotap and Salesforce is as follows:
 
-The integration data flow between Zeotap and Salesforce works as follows:
-
-1. **Data update in Zeotap**: When a customer updates their contact details in Zeotap (for example, changing their phone number or email), Zeotap triggers an API call to Salesforce to update that specific customer’s Contact record.
-   
-2. **API Call to Salesforce**: Zeotap will call Salesforce's REST API endpoints to either **create a new contact** if the contact doesn’t exist or **update an existing contact** if there’s a match (usually based on email or a unique identifier).
-
-3. **Data in Salesforce**: Once the data is passed, Salesforce will update its **Contact object** and store the new values for the customer’s profile.
+1. **Data Creation/Update in Zeotap**: When a customer updates their profile (e.g., changes email, phone number, or other contact information) in Zeotap, this triggers an update in Salesforce.
+2. **API Call to Salesforce**: Zeotap makes an API call to Salesforce's REST API to either create a new Contact or update an existing Contact.
+   - If the contact does not exist in Salesforce, a new Contact record is created.
+   - If the contact exists (usually identified by email or a unique identifier), the existing Contact record is updated.
+3. **Salesforce Data Storage**: Salesforce stores this updated Contact information in its Contact object.
 
 ## 3. Authentication Method
+The integration uses OAuth 2.0 for secure authentication between Zeotap and Salesforce. Here’s a high-level outline of how the OAuth 2.0 flow works:
 
-To interact with Salesforce's REST API, we need to authenticate via **OAuth 2.0**. This method ensures secure and authorized access to the Salesforce instance.
+### Steps to Obtain Access Token:
+- **Step 1**: Redirect the user to Salesforce’s OAuth authorization endpoint.
+https://login.salesforce.com/services/oauth2/authorize
 
-### Steps to obtain and use an access token:
-- **Step 1**: First, we need to redirect the user to Salesforce’s authorization URL to get the authorization code.
-  - **Authorization URL**:  
-  ```plaintext
-  https://login.salesforce.com/services/oauth2/authorize
+- **Step 2**: The user logs in and authorizes the app. Salesforce will return an authorization code.
+- **Step 3**: Zeotap will exchange the authorization code for an access token by sending a POST request to the Salesforce token endpoint:
+https://login.salesforce.com/services/oauth2/token
+
+The POST request body will include:
+- `grant_type=authorization_code`
+- `code={authorization_code}`
+- `client_id={client_id}`
+- `client_secret={client_secret}`
+- `redirect_uri={redirect_uri}`
+
+- **Step 4**: Salesforce responds with an access token, which is used for all future API requests to Salesforce.
+
+### Example Python Code:
+```python
+import requests
+
+# Salesforce OAuth credentials
+client_id = 'your-client-id'
+client_secret = 'your-client-secret'
+redirect_uri = 'http://localhost:8080/callback'
+
+# Authorization code obtained from Salesforce
+authorization_code = 'your-authorization-code'
+
+# Token endpoint
+token_url = 'https://login.salesforce.com/services/oauth2/token'
+
+# Prepare data for token exchange
+data = {
+  'grant_type': 'authorization_code',
+  'code': authorization_code,
+  'client_id': client_id,
+  'client_secret': client_secret,
+  'redirect_uri': redirect_uri
+}
+
+# Request for access token
+response = requests.post(token_url, data=data)
+response_json = response.json()
+
+access_token = response_json['access_token']
+instance_url = response_json['instance_url']
+
+print(f'Access Token: {access_token}')
+print(f'Instance URL: {instance_url}')
+```
+
+## 4. Key Endpoints
+Here are the key Salesforce REST API endpoints that would be used for managing the Contact object:
+
+### Create a Contact:
+- **Endpoint**: POST /services/data/v52.0/sobjects/Contact/
+- **Method**: POST
+- **Description**: This endpoint creates a new contact record in Salesforce.
+
+**Example Payload**:
+```json
+{
+  "FirstName": "John",
+  "LastName": "Doe",
+  "Email": "johndoe@example.com",
+  "Phone": "+1234567890",
+  "Company": "Zeotap"
+}
+```
+
+### Update a Contact:
+- **Endpoint**: PATCH /services/data/v52.0/sobjects/Contact/{ContactId}
+- **Method**: PATCH
+- **Description**: This endpoint updates an existing contact in Salesforce using the Contact ID.
+
+**Example Payload**:
+```json
+{
+  "Email": "john.doe.updated@example.com"
+}
+```
+
+## 5. Sample Requests and Responses
+
+### Creating a Contact:
+**Request**:
+```http
+POST /services/data/v52.0/sobjects/Contact/
+Authorization: Bearer {access_token}
+Content-Type: application/json
+```
+**Payload**:
+```json
+{
+  "FirstName": "John",
+  "LastName": "Doe",
+  "Email": "johndoe@example.com",
+  "Phone": "+1234567890",
+  "Company": "Zeotap"
+}
+```
+**Response**:
+```json
+{
+  "id": "003xx000004TmiHAAR",
+  "success": true,
+  "errors": []
+}
+```
+
+### Updating a Contact:
+**Request**:
+```http
+PATCH /services/data/v52.0/sobjects/Contact/003xx000004TmiHAAR
+Authorization: Bearer {access_token}
+Content-Type: application/json
+```
+**Payload**:
+```json
+{
+  "Email": "john.doe.updated@example.com"
+}
+```
+**Response**:
+```json
+{
+  "id": "003xx000004TmiHAAR",
+  "success": true,
+  "errors": []
+}
+```
+
+## 6. Common Errors, Rate Limits, and Required Fields
+
+### Errors:
+- **400 Bad Request**: This happens when required fields are missing or the request is malformed.
+- **401 Unauthorized**: The access token is invalid or has expired.
+- **403 Forbidden**: The user does not have sufficient permissions to perform the operation.
+- **404 Not Found**: The contact with the provided ID does not exist.
+- **500 Internal Server Error**: Salesforce is experiencing issues.
+
+### Rate Limits:
+Salesforce has API rate limits based on the type of user account. For example, a typical developer account may have a limit of 15,000 requests per day. Exceeding this limit will result in a 503 Service Unavailable error.
+
+### Required Fields for Contact:
+- FirstName (optional, but required for some scenarios)
+- LastName (required)
+- Email (required for updates or creation)
+
+## 7. Assumptions and Edge Cases
+
+### Assumption:
+We assume that the Contact's Email address is a unique identifier for matching records between Zeotap and Salesforce. If no match is found, a new Contact is created.
+
+### Edge Cases:
+- Handling duplicate records based on email address in Salesforce (use duplicate rules in Salesforce).
+- Handling rate limits by implementing a backoff strategy if the API quota is exceeded.
+- Expired Access Tokens: Implement token refresh logic when an access token expires.
+
+## Bonus - Testing the Integration
+
+### Unit Testing:
+Write unit tests for the API call to create and update contacts. Mock the Salesforce API responses.
+
+### Load Testing:
+Simulate bulk contact updates to ensure the integration can handle large volumes of data.
+
+### Edge Case Testing:
+Ensure edge cases like missing required fields, expired tokens, and duplicate records are handled gracefully.
+
+
 
 
 
 ## Github Link for Project
+
 https://github.com/shivakumarrshiv/zeotap_salesforce_integration/
