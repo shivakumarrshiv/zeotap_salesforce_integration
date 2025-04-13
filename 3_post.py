@@ -1,12 +1,12 @@
 import requests
 
 #Salesforce credentials and details
-client_id = '3MVG9RGN2EqkAxhJt87833HHAcRHLDJ0Lj610OHkJ5ppruBFp78kJ8YQrVqfhlf80jL6_0cyeCuSDU663lwXL'
-client_secret = '2FE496A913C43CCB4797435DCB98C1D27E333505DDF827A934A29942B49FC596'
+client_id = 'Consumer Key'
+client_secret = 'Consumer Secret'
 redirect_uri = 'http://localhost:8080/callback'
 
 # Updated values
-authorization_code = 'aPrxKFKmV5zh2NbmHi9dZiETTZBb6but31hvWH9Mxd_6sM9DiJKWEAClGoByk2UMUV1S.BLALA=='
+authorization_code = 'Authorization Code'
 code_verifier = '4dQ1jz-h9QtevHJoqCZmfBh9v1pOJU3BlvI1r1j-F2o'  # Can be Changed
 
 # Salesforce token endpoint
