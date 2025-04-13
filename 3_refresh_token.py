@@ -1,8 +1,8 @@
 # refresh_token.py
 import requests
 
-client_id = '3MVG9RGN2EqkAxhJt87833HHAcRHLDJ0Lj610OHkJ5ppruBFp78kJ8YQrVqfhlf80jL6_0cyeCuSDU663lwXL'
-client_secret = '2FE496A913C43CCB4797435DCB98C1D27E333505DDF827A934A29942B49FC596'
+client_id = 'Consumer Key'
+client_secret = 'Consumer Secret'
 refresh_token = '5Aep8613ZgLngA1wD2JtG0vbH5MTp2GdtPePf9HrPjtYESki3WgNFJWArTVtwv5E_AhBRp446wk_b0B7NMK5e1Z'
 
 token_url = 'https://login.salesforce.com/services/oauth2/token'
